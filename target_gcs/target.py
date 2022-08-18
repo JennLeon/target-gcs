@@ -15,6 +15,6 @@ class TargetGCS(Target):
         th.Property("bucket_name", th.StringType, required=True),
         th.Property("key_prefix", th.StringType, required=False),
         th.Property("key_naming_convention", th.StringType, required=False),
-        th.Property("transformation_timestamp", th.StringType, required=False)
+        th.Property("transformation_timestamp", th.BooleanType, required=False)
     ).to_dict()
     default_sink_class = GCSSink
