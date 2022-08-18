@@ -80,6 +80,8 @@ class GCSSink(RecordSink):
         Developers may optionally read or write additional markers within the
         passed `context` dict from the current batch.
         """
+        record.update({"transformation_timestamp": datetime.utcnow()})
+
         self.gcs_write_handle.write(
             orjson.dumps(record, option=orjson.OPT_APPEND_NEWLINE)
         )
