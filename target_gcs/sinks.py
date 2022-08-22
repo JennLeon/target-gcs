@@ -91,10 +91,6 @@ class GCSSink(RecordSink):
             orjson.dumps(clean_record, option=orjson.OPT_APPEND_NEWLINE)
         )
 
-        self.gcs_write_handle.write(
-            orjson.dumps(record, option=orjson.OPT_APPEND_NEWLINE)
-        )
-
     @staticmethod
     def create_valid_bigquery_field_name(field_name: str) -> str:
         """
