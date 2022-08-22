@@ -83,6 +83,57 @@ class GCSSink(RecordSink):
         if self.config.get("transformation_timestamp"):
             record.update({"transformation_timestamp": datetime.utcnow()})
 
+        clean_record = {}
+        for key, value in record.items():
+            clean_record[self.create_valid_bigquery_field_name(key)] = value
+
+        self.gcs_write_handle.write(
+            orjson.dumps(clean_record, option=orjson.OPT_APPEND_NEWLINE)
+        )
+
         self.gcs_write_handle.write(
             orjson.dumps(record, option=orjson.OPT_APPEND_NEWLINE)
         )
+
+    @staticmethod
+    def create_valid_bigquery_field_name(field_name: str) -> str:
+        """
+        Clean up / prettify field names, make sure they match BigQuery naming conventions.
+
+        Fields must:
+            • contain only
+                -letters,
+                -numbers, and
+                -underscores,
+            • start with a
+                -letter or
+                -underscore, and
+            • be at most 300 characters long
+
+        :param field_name:
+        :param key: JSON field name
+        :return: cleaned up JSON field name
+        """
+
+        cleaned_up_field_name = ""
+
+        # if char is alphanumeric (either letters or numbers), append char to our string
+        for char in field_name:
+            if char.isalnum():
+                cleaned_up_field_name += char
+            else:
+                # otherwise, replace it with underscore
+                if char == '€':
+                    cleaned_up_field_name += "euro"
+                elif char == '$':
+                    cleaned_up_field_name += "money"
+                elif char == '%':
+                    cleaned_up_field_name += "avg"
+                else:
+                    cleaned_up_field_name += "_"
+
+        # if field starts with digit, prepend it with underscore
+        if cleaned_up_field_name[0].isdigit():
+            cleaned_up_field_name = "_%s" % cleaned_up_field_name
+
+        return cleaned_up_field_name[:300]  # trim the string to the first x chars
